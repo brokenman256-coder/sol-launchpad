@@ -1,0 +1,19 @@
+[package]
+name = "launchpad"
+version = "0.1.0"
+description = "Bonding curve launchpad - full platform control"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "launchpad"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.30.1"
