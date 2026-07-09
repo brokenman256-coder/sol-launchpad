@@ -1,0 +1,36 @@
+{
+  "brand": {
+    "name": "pump.fun beta",
+    "tagline": "pump.fun beta — Launch and trade memecoins on Solana",
+    "logoEmoji": "",
+    "primaryColor": "#86efac",
+    "domain": "sol-launchpad-ashen.vercel.app"
+  },
+  "fees": {
+    "tradeFeeBps": 100,
+    "creationFeeSol": 0.02,
+    "feeRecipient": "ApuMe4AJTv7B7rLord3pxjGAAhmeuwR9ttaQVkJShUuh"
+  },
+  "bondingCurve": {
+    "virtualSolReserves": 30,
+    "virtualTokenReserves": 1073000000,
+    "realTokenReserves": 793100000,
+    "tokenTotalSupply": 1000000000,
+    "graduationMarketCapUsd": 69000
+  },
+  "network": {
+    "cluster": "devnet",
+    "rpcUrl": "https://api.devnet.solana.com",
+    "programId": "LAUNCHPAD111111111111111111111111111111111"
+  },
+  "features": {
+    "enableComments": true,
+    "enableLiveChat": false,
+    "requireAgeVerification": true,
+    "maintenanceMode": false
+  },
+  "admin": {
+    "password": "changeme",
+    "moderationEnabled": true
+  }
+}
