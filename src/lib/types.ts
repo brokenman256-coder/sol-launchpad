@@ -70,7 +70,6 @@ export interface Trade {
   priceSol: number;
   marketCapUsd: number;
   wallet: string;
-  /** On-chain Solana transaction signature */
   signature?: string;
   createdAt: number;
 }
