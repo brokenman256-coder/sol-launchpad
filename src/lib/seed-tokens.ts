@@ -11,7 +11,6 @@ const NOUNS = [
   "Rocket", "Moon", "Hat", "Crown", "Coin", "Wojak", "Chad", "Meme", "Clown", "Bonk",
 ];
 
-/** Build the 200-token seed set (same logic as scripts/gen-tokens.mjs). */
 export function buildSeedTokens(count = 200): Token[] {
   const now = Date.now();
   const tokens: Token[] = [];

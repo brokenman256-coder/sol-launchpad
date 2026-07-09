@@ -1,34 +1,47 @@
-import { Suspense } from "react";
-import { AppShell } from "@/components/layout/AppShell";
-import { LiveTicker } from "@/components/layout/LiveTicker";
-import { TokenFeed } from "@/components/tokens/TokenFeed";
-import { getConfig } from "@/lib/store";
+import seedTokens from "@/lib/seed-tokens";
 
-export default function HomePage() {
-  const config = getConfig();
-
+export default function Home() {
+  const tokens = seedTokens;
   return (
-    <AppShell>
-      <div className="mb-4 rounded-xl border border-[#86efac]/30 bg-[#86efac]/10 px-4 py-3 text-center">
-        <p className="text-sm font-bold text-[#86efac]">
-          pump.fun beta
-        </p>
-        <p className="mt-0.5 text-xs text-[#8a8a8a]">
-          {config.brand.tagline} · {config.brand.name}
-        </p>
-      </div>
-      <LiveTicker />
-      <Suspense
-        fallback={
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-28 animate-pulse rounded-xl bg-[#111]" />
-            ))}
-          </div>
-        }
+    <main
+      style={{
+        fontFamily: "system-ui",
+        background: "#000",
+        color: "#fff",
+        minHeight: "100vh",
+        padding: 24,
+      }}
+    >
+      <h1 style={{ color: "#86efac" }}>pump.fun beta</h1>
+      <p>{tokens.length} tokens live</p>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))",
+          gap: 12,
+          marginTop: 24,
+        }}
       >
-        <TokenFeed graduationMcap={config.bondingCurve.graduationMarketCapUsd} />
-      </Suspense>
-    </AppShell>
+        {tokens.map((t) => (
+          <div
+            key={t.mint}
+            style={{
+              border: "1px solid #1f1f1f",
+              borderRadius: 12,
+              padding: 12,
+              background: "#0d0d0d",
+            }}
+          >
+            <div style={{ fontWeight: 700 }}>
+              {t.name}{" "}
+              <span style={{ color: "#86efac" }}>({t.symbol})</span>
+            </div>
+            <div style={{ color: "#666", fontSize: 12, marginTop: 4 }}>
+              ${t.marketCapUsd.toLocaleString()} mcap
+            </div>
+          </div>
+        ))}
+      </div>
+    </main>
   );
 }
