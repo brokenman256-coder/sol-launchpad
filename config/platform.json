@@ -4,7 +4,7 @@
     "tagline": "pump.fun beta — Launch and trade memecoins on Solana",
     "logoEmoji": "",
     "primaryColor": "#86efac",
-    "domain": "sol-launchpad-ashen.vercel.app"
+    "domain": "pump-fun-beta.vercel.app"
   },
   "fees": {
     "tradeFeeBps": 100,
