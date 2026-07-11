@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
-import { MessageCircle } from "lucide-react";
+import { BadgeCheck, MessageCircle, Rocket } from "lucide-react";
 import type { Token } from "@/lib/types";
 import { getProgress } from "@/lib/bonding-curve";
+import { TokenImage } from "@/components/ui/TokenImage";
 
 function formatUsd(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
@@ -17,8 +17,7 @@ function timeAgo(ts: number) {
   if (min < 60) return `${min}m ago`;
   const hr = Math.floor(min / 60);
   if (hr < 24) return `${hr}h ago`;
-  const d = Math.floor(hr / 24);
-  return `${d}d ago`;
+  return `${Math.floor(hr / 24)}d ago`;
 }
 
 function shortAddr(a: string) {
@@ -37,28 +36,31 @@ export function TokenCard({
 }) {
   const progress = getProgress(token.marketCapUsd, graduationMcap);
   const delay = Math.min(index, 12) * 0.04;
+  const change = token.change24h ?? 0;
+  const up = change >= 0;
 
   return (
     <Link
       href={`/coin/${token.mint}`}
-      className="token-card-anim group relative flex gap-3 overflow-hidden rounded-xl border border-[#1f1f1f] bg-[#0d0d0d] p-3"
+      className="token-card-anim group relative flex gap-3 overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-b from-[#121212] to-[#0a0a0a] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
       style={{ animationDelay: `${delay}s` }}
     >
-      <div className="relative h-[84px] w-[84px] shrink-0 overflow-hidden rounded-lg bg-[#1a1a1a] sm:h-[92px] sm:w-[92px]">
-        {token.imageUrl ? (
-          <Image
-            src={token.imageUrl}
-            alt={token.name}
-            fill
-            className="object-cover transition duration-300 group-hover:scale-110"
-            unoptimized
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-3xl">🪙</div>
-        )}
+      <div className="relative shrink-0">
+        <TokenImage
+          src={token.imageUrl}
+          symbol={token.symbol}
+          name={token.name}
+          size={88}
+          rounded="rounded-xl ring-1 ring-white/10"
+        />
         {token.complete && (
-          <span className="absolute left-1 top-1 rounded bg-yellow-400 px-1 py-0.5 text-[9px] font-bold text-black">
-            DEX
+          <span className="absolute left-1 top-1 inline-flex items-center gap-0.5 rounded-md bg-amber-400 px-1.5 py-0.5 text-[9px] font-bold text-black shadow">
+            <Rocket size={9} /> DEX
+          </span>
+        )}
+        {token.verified && !token.complete && (
+          <span className="absolute left-1 top-1 inline-flex items-center gap-0.5 rounded-md bg-sky-500 px-1.5 py-0.5 text-[9px] font-bold text-white shadow">
+            <BadgeCheck size={9} />
           </span>
         )}
       </div>
@@ -66,18 +68,33 @@ export function TokenCard({
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-white transition-colors group-hover:text-[#86efac]">
-              {token.name}{" "}
-              <span className="font-normal text-[#666]">({token.symbol})</span>
+            <p className="flex items-center gap-1 truncate text-sm font-semibold text-white transition-colors group-hover:text-[#86efac]">
+              <span className="truncate">
+                {token.name}{" "}
+                <span className="font-normal text-[#666]">({token.symbol})</span>
+              </span>
+              {token.verified && (
+                <BadgeCheck size={14} className="shrink-0 text-sky-400" />
+              )}
             </p>
             <p className="mt-0.5 text-[11px] text-[#555]">
               {timeAgo(token.createdAt)} · {shortAddr(token.creator)}
             </p>
           </div>
-          <span className="flex shrink-0 items-center gap-1 text-[11px] text-[#666]">
-            <MessageCircle size={11} />
-            {token.replies}
-          </span>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <span className="flex items-center gap-1 text-[11px] text-[#666]">
+              <MessageCircle size={11} />
+              {token.replies}
+            </span>
+            <span
+              className={`text-[11px] font-semibold tabular-nums ${
+                up ? "text-emerald-400" : "text-rose-400"
+              }`}
+            >
+              {up ? "+" : ""}
+              {change.toFixed(1)}%
+            </span>
+          </div>
         </div>
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
@@ -88,21 +105,28 @@ export function TokenCard({
             </p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-[#555]">Vol 24h</p>
+            <p className="text-[10px] text-[#555]">Vol · Liq</p>
             <p className="text-xs font-medium text-[#aaa] tabular-nums">
-              {token.volume24h.toFixed(1)} SOL
+              {token.volume24h.toFixed(1)} SOL · {formatUsd(token.liquidityUsd ?? 0)}
             </p>
           </div>
         </div>
 
-        <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-[#1f1f1f]">
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#1a1a1a]">
           <div
             className={`bond-bar-fill h-full rounded-full ${
-              token.complete ? "bg-yellow-400" : "bg-[#86efac]"
+              token.complete
+                ? "bg-gradient-to-r from-amber-300 to-yellow-400"
+                : "bg-gradient-to-r from-emerald-500 to-[#86efac]"
             }`}
             style={{ width: `${progress}%`, animationDelay: `${delay + 0.15}s` }}
           />
         </div>
+        <p className="mt-1 text-[10px] text-[#444]">
+          {token.complete
+            ? "Graduated · open market"
+            : `${progress.toFixed(0)}% to graduation`}
+        </p>
       </div>
     </Link>
   );
