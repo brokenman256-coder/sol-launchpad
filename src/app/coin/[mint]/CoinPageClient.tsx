@@ -1,9 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, MessageCircle, Share2 } from "lucide-react";
+import {
+  ArrowLeft,
+  BadgeCheck,
+  ExternalLink,
+  Globe,
+  Lock,
+  MessageCircle,
+  Rocket,
+  Share2,
+  Shield,
+} from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { BondingProgress } from "@/components/tokens/BondingProgress";
 import { TradePanel } from "@/components/trade/TradePanel";
@@ -11,8 +20,15 @@ import { PriceChart } from "@/components/chart/PriceChart";
 import { CommentForm } from "@/components/coin/CommentForm";
 import { TradeHistory } from "@/components/coin/TradeHistory";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { TokenImage } from "@/components/ui/TokenImage";
 import { generatePriceHistory } from "@/lib/chart-data";
 import type { Comment, Token, Trade } from "@/lib/types";
+
+function formatUsd(n: number) {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
+  return `$${n.toFixed(0)}`;
+}
 
 export function CoinPageClient({
   mint,
@@ -62,8 +78,8 @@ export function CoinPageClient({
     return (
       <AppShell>
         <div className="space-y-4">
-          <div className="h-64 animate-pulse rounded-xl bg-[#111]" />
-          <div className="h-48 animate-pulse rounded-xl bg-[#111]" />
+          <div className="h-64 animate-pulse rounded-2xl bg-[#111]" />
+          <div className="h-48 animate-pulse rounded-2xl bg-[#111]" />
         </div>
       </AppShell>
     );
@@ -77,6 +93,9 @@ export function CoinPageClient({
     );
   }
 
+  const change = token.change24h ?? 0;
+  const up = change >= 0;
+
   return (
     <AppShell>
       <Link
@@ -88,24 +107,30 @@ export function CoinPageClient({
 
       <div className="grid gap-4 lg:grid-cols-3 lg:gap-5">
         <div className="space-y-4 lg:col-span-2">
-          <div className="overflow-hidden rounded-xl border border-[#1f1f1f] bg-[#0d0d0d]">
+          <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-b from-[#121212] to-[#0a0a0a]">
             <div className="flex items-start gap-4 p-4 sm:p-5">
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-[#1a1a1a] sm:h-24 sm:w-24">
-                {token.imageUrl ? (
-                  <Image
-                    src={token.imageUrl}
-                    alt={token.name}
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-4xl">🪙</div>
-                )}
-              </div>
+              <TokenImage
+                src={token.imageUrl}
+                symbol={token.symbol}
+                name={token.name}
+                size={96}
+                rounded="rounded-2xl ring-1 ring-white/10"
+              />
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      {token.complete && (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-amber-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-300">
+                          <Rocket size={11} /> Graduated DEX
+                        </span>
+                      )}
+                      {token.verified && (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-sky-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-sky-300">
+                          <BadgeCheck size={11} /> Verified
+                        </span>
+                      )}
+                    </div>
                     <h1 className="truncate text-xl font-bold text-white sm:text-2xl">
                       {token.name}
                     </h1>
@@ -119,7 +144,7 @@ export function CoinPageClient({
                   </div>
                   <button
                     onClick={share}
-                    className="shrink-0 rounded-full border border-[#222] p-2 text-[#666] hover:border-[#333] hover:text-white"
+                    className="shrink-0 rounded-full border border-white/10 p-2 text-[#666] hover:border-[#333] hover:text-white"
                   >
                     <Share2 size={16} />
                   </button>
@@ -129,30 +154,105 @@ export function CoinPageClient({
                     {token.description}
                   </p>
                 )}
+                {(token.socials?.website ||
+                  token.socials?.twitter ||
+                  token.socials?.telegram) && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {token.socials.website && (
+                      <a
+                        href={token.socials.website}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 rounded-full border border-white/10 px-2.5 py-1 text-[11px] text-[#aaa] hover:text-white"
+                      >
+                        <Globe size={11} /> Website
+                      </a>
+                    )}
+                    {token.socials.twitter && (
+                      <a
+                        href={token.socials.twitter}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 rounded-full border border-white/10 px-2.5 py-1 text-[11px] text-[#aaa] hover:text-white"
+                      >
+                        <ExternalLink size={11} /> X
+                      </a>
+                    )}
+                    {token.socials.telegram && (
+                      <a
+                        href={token.socials.telegram}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 rounded-full border border-white/10 px-2.5 py-1 text-[11px] text-[#aaa] hover:text-white"
+                      >
+                        <ExternalLink size={11} /> Telegram
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#1f1f1f] bg-[#0d0d0d] p-4 sm:p-5">
+          <div className="rounded-2xl border border-white/[0.06] bg-[#0d0d0d] p-4 sm:p-5">
             <PriceChart data={chartData} />
-            <div className="mt-4 grid grid-cols-3 gap-2 text-center sm:gap-3">
-              <div className="rounded-lg bg-black p-3">
-                <p className="text-[10px] uppercase tracking-wide text-[#555]">Market cap</p>
+            <div className="mt-4 grid grid-cols-2 gap-2 text-center sm:grid-cols-4 sm:gap-3">
+              <div className="rounded-xl bg-black/60 p-3">
+                <p className="text-[10px] uppercase tracking-wide text-[#555]">
+                  Market cap
+                </p>
                 <p className="mt-0.5 font-bold text-[#86efac]">
-                  ${token.marketCapUsd.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  {formatUsd(token.marketCapUsd)}
                 </p>
               </div>
-              <div className="rounded-lg bg-black p-3">
-                <p className="text-[10px] uppercase tracking-wide text-[#555]">Price</p>
+              <div className="rounded-xl bg-black/60 p-3">
+                <p className="text-[10px] uppercase tracking-wide text-[#555]">
+                  24h
+                </p>
+                <p
+                  className={`mt-0.5 font-bold ${
+                    up ? "text-emerald-400" : "text-rose-400"
+                  }`}
+                >
+                  {up ? "+" : ""}
+                  {change.toFixed(1)}%
+                </p>
+              </div>
+              <div className="rounded-xl bg-black/60 p-3">
+                <p className="text-[10px] uppercase tracking-wide text-[#555]">
+                  Liquidity
+                </p>
                 <p className="mt-0.5 font-bold text-white">
-                  {token.priceSol.toExponential(2)} SOL
+                  {formatUsd(token.liquidityUsd ?? 0)}
                 </p>
               </div>
-              <div className="rounded-lg bg-black p-3">
-                <p className="text-[10px] uppercase tracking-wide text-[#555]">24h Vol</p>
-                <p className="mt-0.5 font-bold text-white">{token.volume24h.toFixed(2)} SOL</p>
+              <div className="rounded-xl bg-black/60 p-3">
+                <p className="text-[10px] uppercase tracking-wide text-[#555]">
+                  Holders
+                </p>
+                <p className="mt-0.5 font-bold text-white">
+                  {(token.holders ?? 0).toLocaleString()}
+                </p>
               </div>
             </div>
+
+            <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
+              {token.renounced && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-emerald-400">
+                  <Shield size={11} /> Mint renounced
+                </span>
+              )}
+              {typeof token.lpLocked === "number" && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-amber-300">
+                  <Lock size={11} /> LP locked {token.lpLocked}%
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2.5 py-1 text-[#888]">
+                Vol {token.volume24h.toFixed(1)} SOL · Txns{" "}
+                {token.txns24h ?? 0}
+              </span>
+            </div>
+
             <div className="mt-4">
               <BondingProgress
                 marketCapUsd={token.marketCapUsd}
@@ -164,7 +264,7 @@ export function CoinPageClient({
 
           <TradeHistory trades={trades} />
 
-          <div className="rounded-xl border border-[#1f1f1f] bg-[#0d0d0d] p-4 sm:p-5">
+          <div className="rounded-2xl border border-white/[0.06] bg-[#0d0d0d] p-4 sm:p-5">
             <h3 className="mb-3 flex items-center gap-2 font-semibold text-white">
               <MessageCircle size={16} className="text-[#86efac]" />
               Thread ({comments.length})
@@ -175,7 +275,7 @@ export function CoinPageClient({
                 <p className="text-sm text-[#555]">Be the first to reply</p>
               ) : (
                 comments.map((c) => (
-                  <div key={c.id} className="rounded-lg bg-black p-3">
+                  <div key={c.id} className="rounded-xl bg-black/60 p-3">
                     <p className="text-xs font-medium text-[#86efac]">
                       {c.author.slice(0, 4)}…{c.author.slice(-4)}
                     </p>
